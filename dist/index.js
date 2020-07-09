@@ -2419,6 +2419,7 @@ function checkMode (stat, options) {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const run_1 = __webpack_require__(861);
+process.stdout.write('before run');
 run_1.run();
 
 
@@ -8765,90 +8766,6 @@ exports.restEndpointMethods = restEndpointMethods;
 
 /***/ }),
 
-/***/ 856:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.handle = void 0;
-const issueNumberParser_1 = __webpack_require__(566);
-function handle(octokit, context) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (context.issue.number === undefined) {
-            return;
-        }
-        const inReviewLabel = 'In-Review';
-        const resolvedTestItLabel = 'Resolved (test it)';
-        const owner = context.repo.owner;
-        const repo = context.repo.repo;
-        const issue = yield octokit.issues.get({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number
-        });
-        const issueNumberFromBody = issueNumberParser_1.parseIssueNumber(owner, repo, issue.data.body);
-        process.stdout.write(issueNumberFromBody);
-        if (!Number(issueNumberFromBody)) {
-            return;
-        }
-        //   const responseLabels = await octokit.issues.listLabelsForRepo({
-        //     owner: owner,
-        //     repo: repo
-        //   })
-        const isMerged = context.payload.pull_request && context.payload.pull_request['merged'];
-        const issueLabelsResponse = yield octokit.issues.listLabelsOnIssue({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: Number(issueNumberFromBody)
-        });
-        if (isMerged) {
-            const issueLabel = issueLabelsResponse.data.find((l) => l.name === inReviewLabel);
-            if (issueLabel !== undefined) {
-                yield octokit.issues.removeLabel({
-                    owner: owner,
-                    repo: repo,
-                    issue_number: Number(issueNumberFromBody),
-                    name: inReviewLabel
-                });
-            }
-            const resolvedTestIt = issueLabelsResponse.data.find((l) => l.name === resolvedTestItLabel);
-            if (resolvedTestIt === undefined) {
-                yield octokit.issues.addLabels({
-                    owner: owner,
-                    repo: repo,
-                    issue_number: Number(issueNumberFromBody),
-                    labels: [resolvedTestItLabel]
-                });
-            }
-        }
-        else {
-            const issueLabel = issueLabelsResponse.data.find((l) => l.name === inReviewLabel);
-            if (issueLabel === undefined) {
-                yield octokit.issues.addLabels({
-                    owner: owner,
-                    repo: repo,
-                    issue_number: Number(issueNumberFromBody),
-                    labels: [inReviewLabel]
-                });
-            }
-        }
-    });
-}
-exports.handle = handle;
-
-
-/***/ }),
-
 /***/ 861:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -8886,13 +8803,74 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.run = void 0;
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
-const handler = __importStar(__webpack_require__(856));
+const issueNumberParser_1 = __webpack_require__(566);
+// import * as handler from './handler'
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const token = core.getInput('github-token');
             const octokit = github.getOctokit(token);
-            yield handler.handle(octokit, github.context);
+            process.stdout.write('auto pr issue label has started...');
+            const context = github.context;
+            if (context.issue.number === undefined) {
+                return;
+            }
+            const inReviewLabel = 'In-Review';
+            const resolvedTestItLabel = 'Resolved (test it)';
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue = yield octokit.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number
+            });
+            const issueNumberFromBody = issueNumberParser_1.parseIssueNumber(owner, repo, issue.data.body);
+            process.stdout.write(issueNumberFromBody);
+            if (!Number(issueNumberFromBody)) {
+                return;
+            }
+            //   const responseLabels = await octokit.issues.listLabelsForRepo({
+            //     owner: owner,
+            //     repo: repo
+            //   })
+            const isMerged = context.payload.pull_request && context.payload.pull_request['merged'];
+            const issueLabelsResponse = yield octokit.issues.listLabelsOnIssue({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: Number(issueNumberFromBody)
+            });
+            if (isMerged) {
+                const issueLabel = issueLabelsResponse.data.find((l) => l.name === inReviewLabel);
+                if (issueLabel !== undefined) {
+                    yield octokit.issues.removeLabel({
+                        owner: owner,
+                        repo: repo,
+                        issue_number: Number(issueNumberFromBody),
+                        name: inReviewLabel
+                    });
+                }
+                const resolvedTestIt = issueLabelsResponse.data.find((l) => l.name === resolvedTestItLabel);
+                if (resolvedTestIt === undefined) {
+                    yield octokit.issues.addLabels({
+                        owner: owner,
+                        repo: repo,
+                        issue_number: Number(issueNumberFromBody),
+                        labels: [resolvedTestItLabel]
+                    });
+                }
+            }
+            else {
+                const issueLabel = issueLabelsResponse.data.find((l) => l.name === inReviewLabel);
+                if (issueLabel === undefined) {
+                    yield octokit.issues.addLabels({
+                        owner: owner,
+                        repo: repo,
+                        issue_number: Number(issueNumberFromBody),
+                        labels: [inReviewLabel]
+                    });
+                }
+            }
+            // await handler.handle(octokit, github.context)
         }
         catch (error) {
             core.setFailed(error.message);
