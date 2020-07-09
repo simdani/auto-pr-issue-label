@@ -23,7 +23,7 @@ async function run(): Promise<void> {
       )
       const linkIssueNumber = +linkIssueStr
 
-      process.stdout.write(linkIssueNumber)
+      process.stdout.write(linkIssueNumber.toString())
       process.stdout.write(res.data.title)
       process.stdout.write(res.data.body)
     }
