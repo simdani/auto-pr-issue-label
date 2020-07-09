@@ -2461,12 +2461,12 @@ function run() {
                         issue_number: Number(issueNumberFromBody)
                     });
                     const issueLabel = issueLabelsResponse.data.find(l => l.name === inReviewLabel);
-                    if (issueLabel === undefined) {
-                        yield octokit.issues.addLabels({
+                    if (issueLabel !== undefined) {
+                        yield octokit.issues.removeLabel({
                             owner: context.repo.owner,
                             repo: context.repo.repo,
                             issue_number: Number(issueNumberFromBody),
-                            labels: [inReviewLabel]
+                            name: inReviewLabel
                         });
                     }
                     // add resolved label

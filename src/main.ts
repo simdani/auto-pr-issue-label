@@ -43,12 +43,12 @@ async function run(): Promise<void> {
         const issueLabel = issueLabelsResponse.data.find(
           l => l.name === inReviewLabel
         )
-        if (issueLabel === undefined) {
-          await octokit.issues.addLabels({
+        if (issueLabel !== undefined) {
+          await octokit.issues.removeLabel({
             owner: context.repo.owner,
             repo: context.repo.repo,
             issue_number: Number(issueNumberFromBody),
-            labels: [inReviewLabel]
+            name: inReviewLabel
           })
         }
 
