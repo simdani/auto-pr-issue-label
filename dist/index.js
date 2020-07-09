@@ -2448,7 +2448,7 @@ function run() {
                 // process.stdout.write(res.data.title)
                 // process.stdout.write(res.data.body)
                 const responseLabels = yield octokit.issues.listLabelsForRepo({
-                    owner: context.repo.repo,
+                    owner: context.repo.owner,
                     repo: context.repo.repo
                 });
                 process.stdout.write('before check');
