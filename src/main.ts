@@ -23,6 +23,9 @@ async function run(): Promise<void> {
       )
       const linkIssueNumber = +linkIssueStr
 
+      // const issueNumberFromBody = res.data.body
+
+      process.stdout.write(context.repo.repo)
       process.stdout.write(linkIssueNumber.toString())
       process.stdout.write(res.data.title)
       process.stdout.write(res.data.body)
