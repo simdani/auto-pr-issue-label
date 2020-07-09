@@ -6589,6 +6589,18 @@ module.exports = isPlainObject;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseIssueNumber = void 0;
 function parseIssueNumber(owner, repo, description) {
+    const parseFull = parseFullIssue(owner, repo, description);
+    if (parseFull) {
+        return parseFull;
+    }
+    const parseDirect = parseDirectIssue(description);
+    if (parseDirect) {
+        return parseDirect;
+    }
+    return '';
+}
+exports.parseIssueNumber = parseIssueNumber;
+function parseFullIssue(owner, repo, description) {
     const issueTemplate = `${owner}/${repo}/issues/`;
     const issueTemplateIndex = description.indexOf(issueTemplate);
     let result = '';
@@ -6603,9 +6615,13 @@ function parseIssueNumber(owner, repo, description) {
             }
         }
     }
-    return result;
+    return result.length > 0 ? result : null;
 }
-exports.parseIssueNumber = parseIssueNumber;
+function parseDirectIssue(description) {
+    const issueRegex = /#[1-9]\d*\b/g;
+    const issue = description.match(issueRegex);
+    return issue && issue.length > 0 ? issue[0].substr(1) : null;
+}
 
 
 /***/ }),
