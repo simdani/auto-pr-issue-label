@@ -22,7 +22,7 @@ async function run(): Promise<void> {
         res.data.body
       )
 
-      // process.stdout.write(issueNumberFromBody)
+      process.stdout.write(issueNumberFromBody)
       // process.stdout.write(res.data.title)
       // process.stdout.write(res.data.body)
 
@@ -31,12 +31,15 @@ async function run(): Promise<void> {
         repo: context.repo.repo
       })
 
+      process.stdout.write('before check')
       if (Number(issueNumberFromBody)) {
+        process.stdout.write('inside issue')
         const resolvedTestItLabel = 'Resolved (test it)'
         const resolvedTestIt = responseLabels.data.find(
           l => l.name === resolvedTestItLabel
         )
 
+        process.stdout.write('before creating checking')
         if (resolvedTestIt === undefined) {
           await octokit.issues.createLabel({
             owner: context.repo.owner,
@@ -46,6 +49,7 @@ async function run(): Promise<void> {
             color: '#000000'
           })
         }
+        process.stdout.write('before adding label')
         await octokit.issues.addLabels({
           owner: context.repo.owner,
           repo: context.repo.repo,

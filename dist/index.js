@@ -2444,16 +2444,19 @@ function run() {
                     issue_number: context.issue.number
                 });
                 const issueNumberFromBody = issueNumberParser_1.parseIssueNumber(context.repo.owner, context.repo.repo, res.data.body);
-                // process.stdout.write(issueNumberFromBody)
+                process.stdout.write(issueNumberFromBody);
                 // process.stdout.write(res.data.title)
                 // process.stdout.write(res.data.body)
                 const responseLabels = yield octokit.issues.listLabelsForRepo({
                     owner: context.repo.repo,
                     repo: context.repo.repo
                 });
+                process.stdout.write('before check');
                 if (Number(issueNumberFromBody)) {
+                    process.stdout.write('inside issue');
                     const resolvedTestItLabel = 'Resolved (test it)';
                     const resolvedTestIt = responseLabels.data.find(l => l.name === resolvedTestItLabel);
+                    process.stdout.write('before creating checking');
                     if (resolvedTestIt === undefined) {
                         yield octokit.issues.createLabel({
                             owner: context.repo.owner,
@@ -2463,6 +2466,7 @@ function run() {
                             color: '#000000'
                         });
                     }
+                    process.stdout.write('before adding label');
                     yield octokit.issues.addLabels({
                         owner: context.repo.owner,
                         repo: context.repo.repo,
