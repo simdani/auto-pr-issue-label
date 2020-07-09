@@ -24,6 +24,9 @@ async function run(): Promise<void> {
         res.data.body
       )
 
+      process.stdout.write(context.repo.owner)
+      process.stdout.write(context.repo.repo)
+      process.stdout.write(res.data.body.toString())
       process.stdout.write('issue number is' + issueNumberFromBody)
       // process.stdout.write(res.data.title)
       // process.stdout.write(res.data.body)
