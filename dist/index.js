@@ -2417,114 +2417,9 @@ function checkMode (stat, options) {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const core = __importStar(__webpack_require__(470));
-const github = __importStar(__webpack_require__(469));
-const issueNumberParser_1 = __webpack_require__(566);
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const githubToken = core.getInput('github-token');
-            const octokit = github.getOctokit(githubToken);
-            const context = github.context;
-            if (context.issue.number !== undefined) {
-                const res = yield octokit.issues.get({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: context.issue.number
-                });
-                const issueNumberFromBody = issueNumberParser_1.parseIssueNumber(context.repo.owner, context.repo.repo, res.data.body);
-                process.stdout.write(issueNumberFromBody);
-                // process.stdout.write(res.data.title)
-                // process.stdout.write(res.data.body)
-                const responseLabels = yield octokit.issues.listLabelsForRepo({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo
-                });
-                // const isMerged =
-                //   context.payload.pull_request &&
-                //   context.payload.pull_request['merged'] === true
-                process.stdout.write('before check');
-                if (Number(issueNumberFromBody)) {
-                    // add in review label
-                    const inReviewLabel = 'In-Review';
-                    const issueLabelsResponse = yield octokit.issues.listLabelsOnIssue({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        issue_number: Number(issueNumberFromBody)
-                    });
-                    const issueLabel = issueLabelsResponse.data.find(l => l.name === inReviewLabel);
-                    if (issueLabel !== undefined) {
-                        yield octokit.issues.removeLabel({
-                            owner: context.repo.owner,
-                            repo: context.repo.repo,
-                            issue_number: Number(issueNumberFromBody),
-                            name: inReviewLabel
-                        });
-                    }
-                    // add resolved label
-                    process.stdout.write('inside issue');
-                    const resolvedTestItLabel = 'Resolved (test it)';
-                    const resolvedTestIt = responseLabels.data.find(l => l.name === resolvedTestItLabel);
-                    process.stdout.write('before creating checking');
-                    if (resolvedTestIt === undefined) {
-                        yield octokit.issues.createLabel({
-                            owner: context.repo.owner,
-                            repo: context.repo.repo,
-                            name: resolvedTestItLabel,
-                            description: 'resolved and test it',
-                            color: '#000000'
-                        });
-                    }
-                    process.stdout.write('before adding label');
-                    yield octokit.issues.addLabels({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        issue_number: Number(issueNumberFromBody),
-                        labels: [resolvedTestItLabel]
-                    });
-                    return;
-                }
-                else {
-                    // issue not found
-                    return;
-                }
-            }
-        }
-        catch (error) {
-            core.setFailed(error.message);
-        }
-    });
-}
-run();
+const run_1 = __webpack_require__(861);
+run_1.run();
 
 
 /***/ }),
@@ -8866,6 +8761,150 @@ restEndpointMethods.VERSION = VERSION;
 
 exports.restEndpointMethods = restEndpointMethods;
 //# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 856:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.handle = void 0;
+const issueNumberParser_1 = __webpack_require__(566);
+function handle(octokit, context) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (context.issue.number !== undefined) {
+            const res = yield octokit.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number
+            });
+            const issueNumberFromBody = issueNumberParser_1.parseIssueNumber(context.repo.owner, context.repo.repo, res.data.body);
+            process.stdout.write(issueNumberFromBody);
+            // process.stdout.write(res.data.title)
+            // process.stdout.write(res.data.body)
+            const responseLabels = yield octokit.issues.listLabelsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo
+            });
+            // const isMerged =
+            //   context.payload.pull_request &&
+            //   context.payload.pull_request['merged'] === true
+            process.stdout.write('before check');
+            if (Number(issueNumberFromBody)) {
+                // add in review label
+                const inReviewLabel = 'In-Review';
+                const issueLabelsResponse = yield octokit.issues.listLabelsOnIssue({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: Number(issueNumberFromBody)
+                });
+                const issueLabel = issueLabelsResponse.data.find((l) => l.name === inReviewLabel);
+                if (issueLabel !== undefined) {
+                    yield octokit.issues.removeLabel({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: Number(issueNumberFromBody),
+                        name: inReviewLabel
+                    });
+                }
+                // add resolved label
+                process.stdout.write('inside issue');
+                const resolvedTestItLabel = 'Resolved (test it)';
+                const resolvedTestIt = responseLabels.data.find((l) => l.name === resolvedTestItLabel);
+                process.stdout.write('before creating checking');
+                if (resolvedTestIt === undefined) {
+                    yield octokit.issues.createLabel({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        name: resolvedTestItLabel,
+                        description: 'resolved and test it',
+                        color: '#000000'
+                    });
+                }
+                process.stdout.write('before adding label');
+                yield octokit.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: Number(issueNumberFromBody),
+                    labels: [resolvedTestItLabel]
+                });
+                return;
+            }
+            else {
+                // issue not found
+                return;
+            }
+        }
+    });
+}
+exports.handle = handle;
+
+
+/***/ }),
+
+/***/ 861:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.run = void 0;
+const core = __importStar(__webpack_require__(470));
+const github = __importStar(__webpack_require__(469));
+const handler = __importStar(__webpack_require__(856));
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const token = core.getInput('github-token');
+            const octokit = github.getOctokit(token);
+            yield handler.handle(octokit, github.context);
+        }
+        catch (error) {
+            core.setFailed(error.message);
+        }
+    });
+}
+exports.run = run;
 
 
 /***/ }),
