@@ -27,7 +27,7 @@ async function run(): Promise<void> {
       // process.stdout.write(res.data.body)
 
       const responseLabels = await octokit.issues.listLabelsForRepo({
-        owner: context.repo.repo,
+        owner: context.repo.owner,
         repo: context.repo.repo
       })
 
