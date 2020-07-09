@@ -48,7 +48,12 @@
       "semi": "off",
       "@typescript-eslint/semi": ["error", "never"],
       "@typescript-eslint/type-annotation-spacing": "error",
-      "@typescript-eslint/unbound-method": "error"
+      "@typescript-eslint/unbound-method": "error",
+      "@typescript-eslint/ban-ts-ignore": "off",
+      "@typescript-eslint/class-name-casing": "off",
+      "@typescript-eslint/generic-type-naming": "off",
+      "@typescript-eslint/no-object-literal-type-assertion": "off",
+      "@typescript-eslint/prefer-interface": "off"
     },
     "env": {
       "node": true,
