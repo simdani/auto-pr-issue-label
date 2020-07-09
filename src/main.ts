@@ -31,6 +31,10 @@ async function run(): Promise<void> {
         repo: context.repo.repo
       })
 
+      // const isMerged =
+      //   context.payload.pull_request &&
+      //   context.payload.pull_request['merged'] === true
+
       process.stdout.write('before check')
       if (Number(issueNumberFromBody)) {
         // add in review label
