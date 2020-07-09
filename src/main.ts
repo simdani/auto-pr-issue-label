@@ -24,7 +24,7 @@ async function run(): Promise<void> {
         res.data.body
       )
 
-      process.stdout.write(issueNumberFromBody)
+      process.stdout.write('issue number is' + issueNumberFromBody)
       // process.stdout.write(res.data.title)
       // process.stdout.write(res.data.body)
 

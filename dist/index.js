@@ -2463,7 +2463,7 @@ function run() {
                     issue_number: context.issue.number
                 });
                 const issueNumberFromBody = issueNumberParser_1.parseIssueNumber(context.repo.owner, context.repo.repo, res.data.body);
-                process.stdout.write(issueNumberFromBody);
+                process.stdout.write('issue number is' + issueNumberFromBody);
                 // process.stdout.write(res.data.title)
                 // process.stdout.write(res.data.body)
                 const responseLabels = yield octokit.issues.listLabelsForRepo({
