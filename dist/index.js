@@ -2454,6 +2454,15 @@ function run() {
                 if (Number(issueNumberFromBody)) {
                     const resolvedTestItLabel = 'Resolved (test it)';
                     const resolvedTestIt = responseLabels.data.find(l => l.name === resolvedTestItLabel);
+                    if (resolvedTestIt === undefined) {
+                        yield octokit.issues.createLabel({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            name: resolvedTestItLabel,
+                            description: 'resolved and test it',
+                            color: '#000000'
+                        });
+                    }
                     yield octokit.issues.addLabels({
                         owner: context.repo.owner,
                         repo: context.repo.repo,
