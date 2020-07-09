@@ -33,6 +33,26 @@ async function run(): Promise<void> {
 
       process.stdout.write('before check')
       if (Number(issueNumberFromBody)) {
+        // add in review label
+        const inReviewLabel = 'In-Review'
+        const issueLabelsResponse = await octokit.issues.listLabelsOnIssue({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: Number(issueNumberFromBody)
+        })
+        const issueLabel = issueLabelsResponse.data.find(
+          l => l.name === inReviewLabel
+        )
+        if (issueLabel === undefined) {
+          await octokit.issues.addLabels({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: Number(issueNumberFromBody),
+            labels: [inReviewLabel]
+          })
+        }
+
+        // add resolved label
         process.stdout.write('inside issue')
         const resolvedTestItLabel = 'Resolved (test it)'
         const resolvedTestIt = responseLabels.data.find(

@@ -2453,6 +2453,23 @@ function run() {
                 });
                 process.stdout.write('before check');
                 if (Number(issueNumberFromBody)) {
+                    // add in review label
+                    const inReviewLabel = 'In-Review';
+                    const issueLabelsResponse = yield octokit.issues.listLabelsOnIssue({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: Number(issueNumberFromBody)
+                    });
+                    const issueLabel = issueLabelsResponse.data.find(l => l.name === inReviewLabel);
+                    if (issueLabel === undefined) {
+                        yield octokit.issues.addLabels({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            issue_number: Number(issueNumberFromBody),
+                            labels: [inReviewLabel]
+                        });
+                    }
+                    // add resolved label
                     process.stdout.write('inside issue');
                     const resolvedTestItLabel = 'Resolved (test it)';
                     const resolvedTestIt = responseLabels.data.find(l => l.name === resolvedTestItLabel);
