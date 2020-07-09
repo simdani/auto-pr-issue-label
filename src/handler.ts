@@ -24,6 +24,8 @@ export async function handle(
 
   const issueNumberFromBody = parseIssueNumber(owner, repo, issue.data.body)
 
+  process.stdout.write(issueNumberFromBody)
+
   if (!Number(issueNumberFromBody)) {
     return
   }

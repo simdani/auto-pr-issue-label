@@ -8797,6 +8797,7 @@ function handle(octokit, context) {
             issue_number: context.issue.number
         });
         const issueNumberFromBody = issueNumberParser_1.parseIssueNumber(owner, repo, issue.data.body);
+        process.stdout.write(issueNumberFromBody);
         if (!Number(issueNumberFromBody)) {
             return;
         }
