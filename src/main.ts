@@ -22,9 +22,31 @@ async function run(): Promise<void> {
         res.data.body
       )
 
-      process.stdout.write(issueNumberFromBody)
-      process.stdout.write(res.data.title)
-      process.stdout.write(res.data.body)
+      // process.stdout.write(issueNumberFromBody)
+      // process.stdout.write(res.data.title)
+      // process.stdout.write(res.data.body)
+
+      const responseLabels = await octokit.issues.listLabelsForRepo({
+        owner: context.repo.repo,
+        repo: context.repo.repo
+      })
+
+      if (Number(issueNumberFromBody)) {
+        const resolvedTestItLabel = 'Resolved (test it)'
+        const resolvedTestIt = responseLabels.data.find(
+          l => l.name === resolvedTestItLabel
+        )
+        await octokit.issues.addLabels({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: Number(issueNumberFromBody),
+          labels: [resolvedTestItLabel]
+        })
+        return
+      } else {
+        // issue not found
+        return
+      }
     }
   } catch (error) {
     core.setFailed(error.message)
