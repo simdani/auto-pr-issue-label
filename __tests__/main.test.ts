@@ -1,5 +1,5 @@
 import {wait} from '../src/wait'
-import {parseIssue} from '../src/helpers/issueParser'
+import {parseIssueNumber} from '../src/helpers/issueNumberParser'
 
 test('throws invalid number', async () => {
   const input = parseInt('foo', 10)
@@ -15,6 +15,7 @@ test('wait 500 ms', async () => {
 })
 
 test('test github issue parsing', async () => {
-  const description = 'fixes https://github.com/simdani/test-auto-pr/issues/1'
-  expect(parseIssue('test')).toEqual('test')
+  const description =
+    'fixes https://github.com/test/test-auto-pr/issues/1 and stuff'
+  expect(parseIssueNumber('test', 'test-auto-pr', description)).toEqual('1')
 })

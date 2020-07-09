@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import {parseIssueNumber} from './helpers/issueNumberParser'
 
 async function run(): Promise<void> {
   try {
@@ -15,18 +16,13 @@ async function run(): Promise<void> {
         issue_number: context.issue.number
       })
 
-      const leftParaIndex = res.data.title.indexOf('(')
-      const rightParaIndex = res.data.title.indexOf(')')
-      const linkIssueStr = res.data.title.substring(
-        Number(leftParaIndex) + 2,
-        rightParaIndex
+      const issueNumberFromBody = parseIssueNumber(
+        context.repo.owner,
+        context.repo.repo,
+        res.data.body
       )
-      const linkIssueNumber = +linkIssueStr
 
-      // const issueNumberFromBody = res.data.body
-
-      process.stdout.write(context.repo.repo)
-      process.stdout.write(linkIssueNumber.toString())
+      process.stdout.write(issueNumberFromBody)
       process.stdout.write(res.data.title)
       process.stdout.write(res.data.body)
     }

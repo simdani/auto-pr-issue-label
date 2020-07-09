@@ -2430,6 +2430,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
+const issueNumberParser_1 = __webpack_require__(566);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -2442,13 +2443,8 @@ function run() {
                     repo: context.repo.repo,
                     issue_number: context.issue.number
                 });
-                const leftParaIndex = res.data.title.indexOf('(');
-                const rightParaIndex = res.data.title.indexOf(')');
-                const linkIssueStr = res.data.title.substring(Number(leftParaIndex) + 2, rightParaIndex);
-                const linkIssueNumber = +linkIssueStr;
-                // const issueNumberFromBody = res.data.body
-                process.stdout.write(context.repo.repo);
-                process.stdout.write(linkIssueNumber.toString());
+                const issueNumberFromBody = issueNumberParser_1.parseIssueNumber(context.repo.owner, context.repo.repo, res.data.body);
+                process.stdout.write(issueNumberFromBody);
                 process.stdout.write(res.data.title);
                 process.stdout.write(res.data.body);
             }
@@ -6563,6 +6559,34 @@ function isPlainObject(o) {
 }
 
 module.exports = isPlainObject;
+
+
+/***/ }),
+
+/***/ 566:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function parseIssueNumber(owner, repo, description) {
+    const issueTemplate = `${owner}/${repo}/issues/`;
+    const issueTemplateIndex = description.indexOf(issueTemplate);
+    let result = '';
+    if (issueTemplateIndex !== -1) {
+        const remainingDescription = description.substring(issueTemplateIndex + issueTemplate.length, description.length);
+        for (const value of remainingDescription.split('')) {
+            if (Number(value)) {
+                result += value;
+            }
+            else {
+                break;
+            }
+        }
+    }
+    return result;
+}
+exports.parseIssueNumber = parseIssueNumber;
 
 
 /***/ }),
