@@ -15,7 +15,17 @@ async function run(): Promise<void> {
         issue_number: context.issue.number
       })
 
-      process.stdout.write(res.toString())
+      const leftParaIndex = res.data.title.indexOf('(')
+      const rightParaIndex = res.data.title.indexOf(')')
+      const linkIssueStr = res.data.title.substring(
+        Number(leftParaIndex) + 2,
+        rightParaIndex
+      )
+      const linkIssueNumber = +linkIssueStr
+
+      process.stdout.write(linkIssueNumber)
+      process.stdout.write(res.data.title)
+      process.stdout.write(res.data.body)
     }
   } catch (error) {
     core.setFailed(error.message)
