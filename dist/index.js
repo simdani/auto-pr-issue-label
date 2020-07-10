@@ -2926,6 +2926,7 @@ class Issue {
                     repo: repo,
                     issue_number: this.context.issue.number
                 });
+                core.info(JSON.stringify(issue));
                 return Number(issueNumberParser_1.parseIssueNumber(owner, repo, issue.data.body));
             }
             catch (e) {
@@ -8955,6 +8956,7 @@ function handle(octokit, context) {
             core.info('No issue number was found.');
             return;
         }
+        core.info('Adding labels to issue');
         if (pr.isMerged()) {
             const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
             if (containsInReviewLabel) {
@@ -8967,7 +8969,6 @@ function handle(octokit, context) {
         }
         else {
             const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
-            process.stdout.write(containsInReviewLabel.toString());
             if (!containsInReviewLabel) {
                 yield issue.addLabel(linkedIssueToPRNumber, inReviewLabel);
             }

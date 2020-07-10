@@ -21,6 +21,7 @@ export class Issue {
         repo: repo,
         issue_number: this.context.issue.number
       })
+      core.info(JSON.stringify(issue))
       return Number(parseIssueNumber(owner, repo, issue.data.body))
     } catch (e) {
       core.warning(e)
