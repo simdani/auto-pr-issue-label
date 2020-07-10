@@ -7,9 +7,7 @@ export async function run(): Promise<void> {
     const githubToken = core.getInput('github-token')
     const octokit = github.getOctokit(githubToken)
 
-    const context = github.context
-
-    await handler.handle(octokit, context)
+    await handler.handle(octokit, github.context)
   } catch (error) {
     core.setFailed(error.message)
   }
