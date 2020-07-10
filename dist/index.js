@@ -2931,7 +2931,7 @@ class Issue {
         });
     }
     containsGivenLabel(issueNumber, label) {
-        var _a, _b;
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const { owner, repo } = this.context.repo;
             const issueLabels = yield this.octokit.issues.listLabelsOnIssue({
@@ -2939,8 +2939,9 @@ class Issue {
                 repo: repo,
                 issue_number: issueNumber
             });
-            const findLabel = (_a = issueLabels.data.find((l) => l.name === label)) === null || _a === void 0 ? void 0 : _a.name;
-            return (_b = findLabel == label) !== null && _b !== void 0 ? _b : false;
+            const findLabel = issueLabels.data.find((l) => l.name === label);
+            process.stdout.write((_a = findLabel === null || findLabel === void 0 ? void 0 : findLabel.toString()) !== null && _a !== void 0 ? _a : 'not found');
+            return findLabel ? true : false;
         });
     }
 }
