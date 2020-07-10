@@ -15,5 +15,5 @@ inputs:
     default: '{"name": "Resolved (test it), "color": "#0e8a16"}'
     required: false
 runs:
-  using: 'node14'
+  using: 'node12'
   main: 'dist/index.js'

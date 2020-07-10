@@ -1,28 +1,27 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as handler from './handler'
-import {label} from './interfaces/label'
-import {configuration} from './interfaces/configuration'
+// import {label} from './interfaces/label'
 
 export async function run(): Promise<void> {
   try {
-    const configuration = getConfiguration()
-    const octokit = github.getOctokit(configuration.githubToken)
+    // const configuration = getConfiguration()
+    const octokit = github.getOctokit(core.getInput('github-token'))
 
-    await handler.handle(octokit, github.context, configuration)
+    await handler.handle(octokit, github.context)
   } catch (error) {
     core.setFailed(error.message)
   }
 }
 
-function getConfiguration(): configuration {
-  const githubToken = core.getInput('github-token')
-  const inReviewLabel: label = JSON.parse(core.getInput('in-review-label'))
-  const doneLabel: label = JSON.parse(core.getInput('done-label'))
+// function getConfiguration(): configuration {
+//   const githubToken = core.getInput('github-token')
+//   const inReviewLabel: label = JSON.parse(core.getInput('in-review-label'))
+//   const doneLabel: label = JSON.parse(core.getInput('done-label'))
 
-  return {
-    githubToken,
-    inReviewLabel,
-    doneLabel
-  }
-}
+//   return {
+//     githubToken,
+//     inReviewLabel,
+//     doneLabel
+//   }
+// }
