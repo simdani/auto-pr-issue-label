@@ -2926,8 +2926,13 @@ class Issue {
                     repo: repo,
                     issue_number: this.context.issue.number
                 });
-                core.info(JSON.stringify(issue));
-                return Number(issueNumberParser_1.parseIssueNumber(owner, repo, issue.data.body));
+                const extractedIssueNumber = Number(issueNumberParser_1.parseIssueNumber(owner, repo, issue.data.body));
+                yield this.octokit.issues.get({
+                    owner: owner,
+                    repo: repo,
+                    issue_number: extractedIssueNumber
+                });
+                return extractedIssueNumber;
             }
             catch (e) {
                 core.warning(e);
