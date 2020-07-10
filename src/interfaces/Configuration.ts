@@ -1,7 +1,7 @@
-import {Label} from './label'
+import {label} from './label'
 
-export interface Configuration {
+export interface configuration {
   githubToken: string
-  inReviewLabel: Label
-  doneLabel: Label
+  inReviewLabel: label
+  doneLabel: label
 }

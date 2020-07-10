@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as handler from './handler'
-import {Label} from './interfaces/label'
-import {Configuration} from './interfaces/configuration'
+import {label} from './interfaces/label'
+import {configuration} from './interfaces/configuration'
 
 export async function run(): Promise<void> {
   try {
@@ -15,10 +15,10 @@ export async function run(): Promise<void> {
   }
 }
 
-function getConfiguration(): Configuration {
+function getConfiguration(): configuration {
   const githubToken = core.getInput('github-token')
-  const inReviewLabel: Label = JSON.parse(core.getInput('in-review-label'))
-  const doneLabel: Label = JSON.parse(core.getInput('done-label'))
+  const inReviewLabel: label = JSON.parse(core.getInput('in-review-label'))
+  const doneLabel: label = JSON.parse(core.getInput('done-label'))
 
   return {
     githubToken,

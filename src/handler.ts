@@ -3,12 +3,13 @@ import {Context} from '@actions/github/lib/context'
 import {GitHub} from '@actions/github/lib/utils'
 import {PullRequest} from './github/pull_request'
 import {Issue} from './github/issue'
-import {Configuration} from './interfaces/configuration'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import {configuration} from './interfaces/configuration'
 
 export async function handle(
   octokit: InstanceType<typeof GitHub>,
   context: Context,
-  configuration: Configuration
+  configuration: configuration
 ): Promise<void> {
   if (context.issue.number === undefined) {
     return
