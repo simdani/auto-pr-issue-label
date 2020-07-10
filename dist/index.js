@@ -8913,18 +8913,18 @@ function handle(octokit, context) {
         }
         process.stdout.write('check if pr is merged');
         if (pr.isMerged()) {
-            const containsInReviewLabel = issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
+            const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
             if (containsInReviewLabel) {
                 yield issue.removeLabel(linkedIssueToPRNumber, inReviewLabel);
             }
-            const containsResolvedTestItLabel = issue.containsGivenLabel(linkedIssueToPRNumber, resolvedTestItLabel);
+            const containsResolvedTestItLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, resolvedTestItLabel);
             if (!containsResolvedTestItLabel) {
                 yield issue.addLabel(linkedIssueToPRNumber, resolvedTestItLabel);
             }
         }
         else {
             process.stdout.write('check if it contains in review label');
-            const containsInReviewLabel = issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
+            const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
             process.stdout.write(containsInReviewLabel.toString());
             if (!containsInReviewLabel) {
                 process.stdout.write('add in review label');

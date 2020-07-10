@@ -27,13 +27,16 @@ export async function handle(
 
   process.stdout.write('check if pr is merged')
   if (pr.isMerged()) {
-    const containsInReviewLabel = issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel)
+    const containsInReviewLabel = await issue.containsGivenLabel(
+      linkedIssueToPRNumber,
+      inReviewLabel
+    )
 
     if (containsInReviewLabel) {
       await issue.removeLabel(linkedIssueToPRNumber, inReviewLabel)
     }
 
-    const containsResolvedTestItLabel = issue.containsGivenLabel(
+    const containsResolvedTestItLabel = await issue.containsGivenLabel(
       linkedIssueToPRNumber,
       resolvedTestItLabel
     )
@@ -42,7 +45,10 @@ export async function handle(
     }
   } else {
     process.stdout.write('check if it contains in review label')
-    const containsInReviewLabel = issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel)
+    const containsInReviewLabel = await issue.containsGivenLabel(
+      linkedIssueToPRNumber,
+      inReviewLabel
+    )
     process.stdout.write(containsInReviewLabel.toString())
     if (!containsInReviewLabel) {
       process.stdout.write('add in review label')
