@@ -8979,6 +8979,7 @@ function run() {
         try {
             const githubToken = core.getInput('github-token');
             const octokit = github.getOctokit(githubToken);
+            process.stdout.write('in run() function body');
             yield handler.handle(octokit, github.context);
         }
         catch (error) {
