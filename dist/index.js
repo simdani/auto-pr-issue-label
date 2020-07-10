@@ -2941,7 +2941,7 @@ class Issue {
             });
             const findLabel = issueLabels.data.find((l) => l.name === label);
             process.stdout.write((_a = findLabel === null || findLabel === void 0 ? void 0 : findLabel.toString()) !== null && _a !== void 0 ? _a : 'not found');
-            return findLabel ? true : false;
+            return findLabel != null ? true : false;
         });
     }
 }
@@ -8925,6 +8925,7 @@ function handle(octokit, context) {
         else {
             process.stdout.write('check if it contains in review label');
             const containsInReviewLabel = issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
+            process.stdout.write(containsInReviewLabel.toString());
             if (!containsInReviewLabel) {
                 process.stdout.write('add in review label');
                 yield issue.addLabel(linkedIssueToPRNumber, inReviewLabel);

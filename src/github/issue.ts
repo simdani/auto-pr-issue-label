@@ -56,6 +56,7 @@ export class Issue {
     const findLabel = issueLabels.data.find((l: {name: string}) => l.name === label)
 
     process.stdout.write(findLabel?.toString() ?? 'not found')
-    return findLabel ? true : false
+
+    return findLabel != null ? true : false
   }
 }
