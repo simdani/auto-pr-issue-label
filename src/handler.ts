@@ -9,7 +9,6 @@ export async function handle(
   context: Context
 ): Promise<void> {
   if (context.issue.number === undefined) {
-    core.warning('PR number was not found.')
     return
   }
   const pr = new PullRequest(octokit, context)
@@ -23,11 +22,11 @@ export async function handle(
   core.info(`Extracting linked issue from PR: ${linkedIssueToPRNumber?.toString() ?? 'not found'}`)
 
   if (!linkedIssueToPRNumber) {
-    core.info('No issue number was found.')
+    core.info('No issue number was found. Exiting.')
     return
   }
 
-  core.info('Adding labels to issue')
+  core.info('Check if label needs to be added.')
   if (pr.isMerged()) {
     const containsInReviewLabel = await issue.containsGivenLabel(
       linkedIssueToPRNumber,

@@ -8948,7 +8948,6 @@ function handle(octokit, context) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (context.issue.number === undefined) {
-            core.warning('PR number was not found.');
             return;
         }
         const pr = new pull_request_1.PullRequest(octokit, context);
@@ -8958,10 +8957,10 @@ function handle(octokit, context) {
         const linkedIssueToPRNumber = yield issue.getLinkedIssueToPrNumber();
         core.info(`Extracting linked issue from PR: ${(_a = linkedIssueToPRNumber === null || linkedIssueToPRNumber === void 0 ? void 0 : linkedIssueToPRNumber.toString()) !== null && _a !== void 0 ? _a : 'not found'}`);
         if (!linkedIssueToPRNumber) {
-            core.info('No issue number was found.');
+            core.info('No issue number was found. Exiting.');
             return;
         }
-        core.info('Adding labels to issue');
+        core.info('Check if label needs to be added.');
         if (pr.isMerged()) {
             const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
             if (containsInReviewLabel) {
@@ -9028,6 +9027,10 @@ function run() {
         try {
             const githubToken = core.getInput('github-token');
             const octokit = github.getOctokit(githubToken);
+            const inReviewLabel = JSON.parse(core.getInput('in-review-label'));
+            core.info('started');
+            core.info(inReviewLabel.name);
+            core.info(inReviewLabel.color);
             yield handler.handle(octokit, github.context);
         }
         catch (error) {
