@@ -2900,12 +2900,18 @@ class Issue {
     getLinkedIssueToPrNumber() {
         return __awaiter(this, void 0, void 0, function* () {
             const { owner, repo } = this.context.repo;
-            const issue = yield this.octokit.issues.get({
-                owner: owner,
-                repo: repo,
-                issue_number: this.context.issue.number
-            });
-            return Number(issueNumberParser_1.parseIssueNumber(owner, repo, issue.data.body));
+            try {
+                const issue = yield this.octokit.issues.get({
+                    owner: owner,
+                    repo: repo,
+                    issue_number: this.context.issue.number
+                });
+                return Number(issueNumberParser_1.parseIssueNumber(owner, repo, issue.data.body));
+            }
+            catch (e) {
+                process.stdout.write(e);
+            }
+            return null;
         });
     }
     addLabel(issueNumber, label) {

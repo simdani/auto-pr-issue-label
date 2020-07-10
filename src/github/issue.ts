@@ -13,13 +13,19 @@ export class Issue {
 
   async getLinkedIssueToPrNumber(): Promise<number | null> {
     const {owner, repo} = this.context.repo
-    const issue = await this.octokit.issues.get({
-      owner: owner,
-      repo: repo,
-      issue_number: this.context.issue.number
-    })
+    try {
+      const issue = await this.octokit.issues.get({
+        owner: owner,
+        repo: repo,
+        issue_number: this.context.issue.number
+      })
 
-    return Number(parseIssueNumber(owner, repo, issue.data.body))
+      return Number(parseIssueNumber(owner, repo, issue.data.body))
+    } catch (e) {
+      process.stdout.write(e)
+    }
+
+    return null
   }
 
   async addLabel(issueNumber: number, label: string): Promise<void> {
