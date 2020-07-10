@@ -3,7 +3,7 @@ import {Context} from '@actions/github/lib/context'
 import {GitHub} from '@actions/github/lib/utils'
 import {PullRequest} from './github/pull_request'
 import {Issue} from './github/issue'
-import {Configuration} from './interfaces/Configuration'
+import {Configuration} from './interfaces/configuration'
 
 export async function handle(
   octokit: InstanceType<typeof GitHub>,

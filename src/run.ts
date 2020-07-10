@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as handler from './handler'
-import {Label} from './interfaces/Label'
-import {Configuration} from './interfaces/Configuration'
+import {Label} from './interfaces/label'
+import {Configuration} from './interfaces/configuration'
 
 export async function run(): Promise<void> {
   try {

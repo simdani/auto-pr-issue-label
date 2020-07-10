@@ -19,3 +19,5 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: ./
+      with:
+        in-review-label: '{"name": "In-Review", "color": "#c2e0c6"}'

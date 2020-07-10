@@ -1,4 +1,4 @@
-import {Label} from './Label'
+import {Label} from './label'
 
 export interface Configuration {
   githubToken: string
