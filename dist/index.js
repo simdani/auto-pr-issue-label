@@ -8837,12 +8837,11 @@ exports.run = void 0;
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
 const handler = __importStar(__webpack_require__(856));
-// import {label} from './interfaces/label'
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // const configuration = getConfiguration()
-            const octokit = github.getOctokit(core.getInput('github-token'));
+            const configuration = getConfiguration();
+            const octokit = github.getOctokit(configuration.githubToken);
             yield handler.handle(octokit, github.context);
         }
         catch (error) {
@@ -8851,16 +8850,16 @@ function run() {
     });
 }
 exports.run = run;
-// function getConfiguration(): configuration {
-//   const githubToken = core.getInput('github-token')
-//   const inReviewLabel: label = JSON.parse(core.getInput('in-review-label'))
-//   const doneLabel: label = JSON.parse(core.getInput('done-label'))
-//   return {
-//     githubToken,
-//     inReviewLabel,
-//     doneLabel
-//   }
-// }
+function getConfiguration() {
+    const githubToken = core.getInput('github-token');
+    const inReviewLabel = JSON.parse(core.getInput('in-review-label'));
+    const doneLabel = JSON.parse(core.getInput('done-label'));
+    return {
+        githubToken,
+        inReviewLabel,
+        doneLabel
+    };
+}
 
 
 /***/ }),
