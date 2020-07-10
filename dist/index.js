@@ -2336,6 +2336,44 @@ module.exports.MaxBufferError = MaxBufferError;
 
 /***/ }),
 
+/***/ 164:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseIssueNumber = void 0;
+function parseIssueNumber(owner, repo, description) {
+    var _a, _b;
+    return (_b = (_a = parseFullIssue(owner, repo, description)) !== null && _a !== void 0 ? _a : parseDirectIssue(description)) !== null && _b !== void 0 ? _b : '';
+}
+exports.parseIssueNumber = parseIssueNumber;
+function parseFullIssue(owner, repo, description) {
+    const issueTemplate = `${owner}/${repo}/issues/`;
+    const issueTemplateIndex = description.indexOf(issueTemplate);
+    let result = '';
+    if (issueTemplateIndex !== -1) {
+        const remainingDescription = description.substring(issueTemplateIndex + issueTemplate.length, description.length);
+        for (const value of remainingDescription.split('')) {
+            if (Number(value)) {
+                result += value;
+            }
+            else {
+                break;
+            }
+        }
+    }
+    return result.length > 0 ? result : null;
+}
+function parseDirectIssue(description) {
+    const issueRegex = /#[1-9]\d*\b/g;
+    const issue = description.match(issueRegex);
+    return issue && issue.length > 0 ? issue[0].substr(1) : null;
+}
+
+
+/***/ }),
+
 /***/ 168:
 /***/ (function(module) {
 
@@ -2911,7 +2949,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Issue = void 0;
 const core = __importStar(__webpack_require__(470));
-const issueNumberParser_1 = __webpack_require__(566);
+const issue_number_parser_1 = __webpack_require__(164);
 class Issue {
     constructor(octokit, context) {
         this.octokit = octokit;
@@ -2926,7 +2964,7 @@ class Issue {
                     repo: repo,
                     issue_number: this.context.issue.number
                 });
-                const parsedIssueNumberFromBody = Number(issueNumberParser_1.parseIssueNumber(owner, repo, issue.data.body));
+                const parsedIssueNumberFromBody = Number(issue_number_parser_1.parseIssueNumber(owner, repo, issue.data.body));
                 const extractedIssue = yield this.octokit.issues.get({
                     owner: owner,
                     repo: repo,
@@ -5889,6 +5927,72 @@ exports.getState = getState;
 
 /***/ }),
 
+/***/ 483:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.LabelWorker = void 0;
+class LabelWorker {
+    constructor(pr, issue, linkedIssueToPRNumber, configuration) {
+        this.pr = pr;
+        this.issue = issue;
+        this.linkedIssueToPRNumber = linkedIssueToPRNumber;
+        this.configuration = configuration;
+    }
+    proccess() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.pr.isMerged()) {
+                this.proccessMergedPR();
+            }
+            else {
+                this.proccessActivePR();
+            }
+        });
+    }
+    proccessMergedPR() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.removeLabelIfItAlreadyExists(this.configuration.inReviewLabel);
+            yield this.addLabelIfDoesNotExist(this.configuration.doneLabel);
+        });
+    }
+    proccessActivePR() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.addLabelIfDoesNotExist(this.configuration.inReviewLabel);
+        });
+    }
+    addLabelIfDoesNotExist(label) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const containsLabel = yield this.issue.containsGivenLabel(this.linkedIssueToPRNumber, label.name);
+            if (!containsLabel) {
+                yield this.issue.addLabel(this.linkedIssueToPRNumber, label.name);
+            }
+        });
+    }
+    removeLabelIfItAlreadyExists(label) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const containsLabel = yield this.issue.containsGivenLabel(this.linkedIssueToPRNumber, label.name);
+            if (containsLabel) {
+                yield this.issue.removeLabel(this.linkedIssueToPRNumber, label.name);
+            }
+        });
+    }
+}
+exports.LabelWorker = LabelWorker;
+
+
+/***/ }),
+
 /***/ 489:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -6717,44 +6821,6 @@ module.exports = isPlainObject;
 
 /***/ }),
 
-/***/ 566:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseIssueNumber = void 0;
-function parseIssueNumber(owner, repo, description) {
-    var _a, _b;
-    return (_b = (_a = parseFullIssue(owner, repo, description)) !== null && _a !== void 0 ? _a : parseDirectIssue(description)) !== null && _b !== void 0 ? _b : '';
-}
-exports.parseIssueNumber = parseIssueNumber;
-function parseFullIssue(owner, repo, description) {
-    const issueTemplate = `${owner}/${repo}/issues/`;
-    const issueTemplateIndex = description.indexOf(issueTemplate);
-    let result = '';
-    if (issueTemplateIndex !== -1) {
-        const remainingDescription = description.substring(issueTemplateIndex + issueTemplate.length, description.length);
-        for (const value of remainingDescription.split('')) {
-            if (Number(value)) {
-                result += value;
-            }
-            else {
-                break;
-            }
-        }
-    }
-    return result.length > 0 ? result : null;
-}
-function parseDirectIssue(description) {
-    const issueRegex = /#[1-9]\d*\b/g;
-    const issue = description.match(issueRegex);
-    return issue && issue.length > 0 ? issue[0].substr(1) : null;
-}
-
-
-/***/ }),
-
 /***/ 568:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -7133,72 +7199,6 @@ module.exports = (promise, onFinally) => {
 		})
 	);
 };
-
-
-/***/ }),
-
-/***/ 719:
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.PRWorker = void 0;
-class PRWorker {
-    constructor(pr, issue, linkedIssueToPRNumber, configuration) {
-        this.pr = pr;
-        this.issue = issue;
-        this.linkedIssueToPRNumber = linkedIssueToPRNumber;
-        this.configuration = configuration;
-    }
-    proccess() {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this.pr.isMerged()) {
-                this.proccessMerged();
-            }
-            else {
-                this.proccessActive();
-            }
-        });
-    }
-    proccessMerged() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.removeLabelIfItAlreadyExists(this.configuration.inReviewLabel);
-            yield this.addLabelIfDoesNotExist(this.configuration.doneLabel);
-        });
-    }
-    proccessActive() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.addLabelIfDoesNotExist(this.configuration.inReviewLabel);
-        });
-    }
-    addLabelIfDoesNotExist(label) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const containsLabel = yield this.issue.containsGivenLabel(this.linkedIssueToPRNumber, label.name);
-            if (!containsLabel) {
-                yield this.issue.addLabel(this.linkedIssueToPRNumber, label.name);
-            }
-        });
-    }
-    removeLabelIfItAlreadyExists(label) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const containsLabel = yield this.issue.containsGivenLabel(this.linkedIssueToPRNumber, label.name);
-            if (containsLabel) {
-                yield this.issue.removeLabel(this.linkedIssueToPRNumber, label.name);
-            }
-        });
-    }
-}
-exports.PRWorker = PRWorker;
 
 
 /***/ }),
@@ -9014,7 +9014,7 @@ exports.handle = void 0;
 const core = __importStar(__webpack_require__(470));
 const pull_request_1 = __webpack_require__(138);
 const issue_1 = __webpack_require__(351);
-const pr_worker_1 = __webpack_require__(719);
+const label_worker_1 = __webpack_require__(483);
 function handle(octokit, context, configuration) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -9029,8 +9029,8 @@ function handle(octokit, context, configuration) {
             core.info('No issue number was found. Exiting.');
             return;
         }
-        const prWorker = new pr_worker_1.PRWorker(pr, issue, linkedIssueToPRNumber, configuration);
-        yield prWorker.proccess();
+        const labelWroker = new label_worker_1.LabelWorker(pr, issue, linkedIssueToPRNumber, configuration);
+        yield labelWroker.proccess();
     });
 }
 exports.handle = handle;

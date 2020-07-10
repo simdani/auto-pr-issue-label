@@ -1,4 +1,4 @@
-import {parseIssueNumber} from '../src/helpers/issueNumberParser'
+import {parseIssueNumber} from '../src/helpers/issue_number_parser'
 
 test('test github issue parsing', async () => {
   const description = 'fixes https://github.com/test/test-auto-pr/issues/1 and stuff'

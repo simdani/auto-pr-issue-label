@@ -1,7 +1,7 @@
 import {GitHub} from '@actions/github/lib/utils'
 import * as core from '@actions/core'
 import {Context} from '@actions/github/lib/context'
-import {parseIssueNumber} from '../helpers/issueNumberParser'
+import {parseIssueNumber} from '../helpers/issue_number_parser'
 import {Label} from '../interfaces/label'
 
 export class Issue {
