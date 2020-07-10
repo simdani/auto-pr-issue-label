@@ -1,4 +1,5 @@
 import {GitHub} from '@actions/github/lib/utils'
+import * as core from '@actions/core'
 import {Context} from '@actions/github/lib/context'
 import {parseIssueNumber} from '../helpers/issueNumberParser'
 
@@ -13,19 +14,18 @@ export class Issue {
 
   async getLinkedIssueToPrNumber(): Promise<number | null> {
     const {owner, repo} = this.context.repo
+
     try {
       const issue = await this.octokit.issues.get({
         owner: owner,
         repo: repo,
         issue_number: this.context.issue.number
       })
-
       return Number(parseIssueNumber(owner, repo, issue.data.body))
     } catch (e) {
-      process.stdout.write(e)
+      core.warning(e)
+      return null
     }
-
-    return null
   }
 
   async addLabel(issueNumber: number, label: string): Promise<void> {
@@ -59,8 +59,6 @@ export class Issue {
       issue_number: issueNumber
     })
 
-    const existingLabel = issueLabels.data.find((l: {name: string}) => l.name === label)
-
-    return existingLabel != null ? true : false
+    return issueLabels.data.some(l => l.name == label)
   }
 }

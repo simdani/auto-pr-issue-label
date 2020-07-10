@@ -1,3 +1,4 @@
+import * as core from '@actions/core'
 import {Context} from '@actions/github/lib/context'
 import {GitHub} from '@actions/github/lib/utils'
 import {PullRequest} from './github/pull_request'
@@ -8,6 +9,7 @@ export async function handle(
   context: Context
 ): Promise<void> {
   if (context.issue.number === undefined) {
+    core.warning('PR number was not found.')
     return
   }
   const pr = new PullRequest(octokit, context)
@@ -18,14 +20,13 @@ export async function handle(
 
   const linkedIssueToPRNumber = await issue.getLinkedIssueToPrNumber()
 
-  process.stdout.write('extract linked issue')
-  process.stdout.write(linkedIssueToPRNumber?.toString() ?? 'not found')
+  core.info(`Extracting linked issue from PR: ${linkedIssueToPRNumber?.toString() ?? 'not found'}`)
 
   if (!linkedIssueToPRNumber) {
+    core.info('No issue number was found.')
     return
   }
 
-  process.stdout.write('check if pr is merged')
   if (pr.isMerged()) {
     const containsInReviewLabel = await issue.containsGivenLabel(
       linkedIssueToPRNumber,
@@ -44,14 +45,12 @@ export async function handle(
       await issue.addLabel(linkedIssueToPRNumber, resolvedTestItLabel)
     }
   } else {
-    process.stdout.write('check if it contains in review label')
     const containsInReviewLabel = await issue.containsGivenLabel(
       linkedIssueToPRNumber,
       inReviewLabel
     )
     process.stdout.write(containsInReviewLabel.toString())
     if (!containsInReviewLabel) {
-      process.stdout.write('add in review label')
       await issue.addLabel(linkedIssueToPRNumber, inReviewLabel)
     }
   }

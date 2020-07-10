@@ -2880,6 +2880,25 @@ isStream.transform = function (stream) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -2891,6 +2910,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Issue = void 0;
+const core = __importStar(__webpack_require__(470));
 const issueNumberParser_1 = __webpack_require__(566);
 class Issue {
     constructor(octokit, context) {
@@ -2909,9 +2929,9 @@ class Issue {
                 return Number(issueNumberParser_1.parseIssueNumber(owner, repo, issue.data.body));
             }
             catch (e) {
-                process.stdout.write(e);
+                core.warning(e);
+                return null;
             }
-            return null;
         });
     }
     addLabel(issueNumber, label) {
@@ -2944,8 +2964,7 @@ class Issue {
                 repo: repo,
                 issue_number: issueNumber
             });
-            const existingLabel = issueLabels.data.find((l) => l.name === label);
-            return existingLabel != null ? true : false;
+            return issueLabels.data.some(l => l.name == label);
         });
     }
 }
@@ -8886,6 +8905,25 @@ exports.restEndpointMethods = restEndpointMethods;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8897,12 +8935,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handle = void 0;
+const core = __importStar(__webpack_require__(470));
 const pull_request_1 = __webpack_require__(138);
 const issue_1 = __webpack_require__(351);
 function handle(octokit, context) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (context.issue.number === undefined) {
+            core.warning('PR number was not found.');
             return;
         }
         const pr = new pull_request_1.PullRequest(octokit, context);
@@ -8910,12 +8950,11 @@ function handle(octokit, context) {
         const inReviewLabel = 'In-Review';
         const resolvedTestItLabel = 'Resolved (test it)';
         const linkedIssueToPRNumber = yield issue.getLinkedIssueToPrNumber();
-        process.stdout.write('extract linked issue');
-        process.stdout.write((_a = linkedIssueToPRNumber === null || linkedIssueToPRNumber === void 0 ? void 0 : linkedIssueToPRNumber.toString()) !== null && _a !== void 0 ? _a : 'not found');
+        core.info(`Extracting linked issue from PR: ${(_a = linkedIssueToPRNumber === null || linkedIssueToPRNumber === void 0 ? void 0 : linkedIssueToPRNumber.toString()) !== null && _a !== void 0 ? _a : 'not found'}`);
         if (!linkedIssueToPRNumber) {
+            core.info('No issue number was found.');
             return;
         }
-        process.stdout.write('check if pr is merged');
         if (pr.isMerged()) {
             const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
             if (containsInReviewLabel) {
@@ -8927,11 +8966,9 @@ function handle(octokit, context) {
             }
         }
         else {
-            process.stdout.write('check if it contains in review label');
             const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
             process.stdout.write(containsInReviewLabel.toString());
             if (!containsInReviewLabel) {
-                process.stdout.write('add in review label');
                 yield issue.addLabel(linkedIssueToPRNumber, inReviewLabel);
             }
         }
@@ -8985,7 +9022,6 @@ function run() {
         try {
             const githubToken = core.getInput('github-token');
             const octokit = github.getOctokit(githubToken);
-            process.stdout.write('in run() function body');
             yield handler.handle(octokit, github.context);
         }
         catch (error) {
