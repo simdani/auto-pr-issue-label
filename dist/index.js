@@ -2927,11 +2927,12 @@ class Issue {
                     issue_number: this.context.issue.number
                 });
                 const extractedIssueNumber = Number(issueNumberParser_1.parseIssueNumber(owner, repo, issue.data.body));
-                yield this.octokit.issues.get({
+                const extractedIssue = yield this.octokit.issues.get({
                     owner: owner,
                     repo: repo,
                     issue_number: extractedIssueNumber
                 });
+                core.info(JSON.stringify(extractedIssue));
                 return extractedIssueNumber;
             }
             catch (e) {

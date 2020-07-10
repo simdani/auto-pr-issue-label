@@ -23,11 +23,12 @@ export class Issue {
       })
 
       const extractedIssueNumber = Number(parseIssueNumber(owner, repo, issue.data.body))
-      await this.octokit.issues.get({
+      const extractedIssue = await this.octokit.issues.get({
         owner: owner,
         repo: repo,
         issue_number: extractedIssueNumber
       })
+      core.info(JSON.stringify(extractedIssue))
       return extractedIssueNumber
     } catch (e) {
       core.warning(e)
