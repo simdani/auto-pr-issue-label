@@ -1,6 +1,6 @@
 # Auto PR issue label
 
-Exmaple of usage:
+Example of usage:
 
 ```YML
 name: "Auto pr worflow"
