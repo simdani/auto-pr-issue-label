@@ -1,15 +1,5 @@
 export function parseIssueNumber(owner: string, repo: string, description: string): string {
-  const parseFull = parseFullIssue(owner, repo, description)
-  if (parseFull) {
-    return parseFull
-  }
-
-  const parseDirect = parseDirectIssue(description)
-  if (parseDirect) {
-    return parseDirect
-  }
-
-  return ''
+  return parseFullIssue(owner, repo, description) ?? parseDirectIssue(description) ?? ''
 }
 
 function parseFullIssue(owner: string, repo: string, description: string): string | null {

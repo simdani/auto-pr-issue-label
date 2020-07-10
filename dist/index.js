@@ -6714,15 +6714,8 @@ module.exports = isPlainObject;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseIssueNumber = void 0;
 function parseIssueNumber(owner, repo, description) {
-    const parseFull = parseFullIssue(owner, repo, description);
-    if (parseFull) {
-        return parseFull;
-    }
-    const parseDirect = parseDirectIssue(description);
-    if (parseDirect) {
-        return parseDirect;
-    }
-    return '';
+    var _a, _b;
+    return (_b = (_a = parseFullIssue(owner, repo, description)) !== null && _a !== void 0 ? _a : parseDirectIssue(description)) !== null && _b !== void 0 ? _b : '';
 }
 exports.parseIssueNumber = parseIssueNumber;
 function parseFullIssue(owner, repo, description) {
