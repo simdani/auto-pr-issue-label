@@ -22,20 +22,19 @@ export class LabelWorker {
   }
 
   async proccess(): Promise<void> {
+    await this.createLabelsInRepo()
+
     if (this.pr.isMerged()) {
-      this.proccessMergedPR()
+      await this.removeLabelIfItAlreadyExists(this.configuration.inReviewLabel)
+      await this.addLabelIfDoesNotExist(this.configuration.doneLabel)
     } else {
-      this.proccessActivePR()
+      await this.addLabelIfDoesNotExist(this.configuration.inReviewLabel)
     }
   }
 
-  private async proccessMergedPR(): Promise<void> {
-    await this.removeLabelIfItAlreadyExists(this.configuration.inReviewLabel)
-    await this.addLabelIfDoesNotExist(this.configuration.doneLabel)
-  }
-
-  private async proccessActivePR(): Promise<void> {
-    await this.addLabelIfDoesNotExist(this.configuration.inReviewLabel)
+  private async createLabelsInRepo(): Promise<void> {
+    await this.issue.createLabel(this.configuration.inReviewLabel)
+    await this.issue.createLabel(this.configuration.doneLabel)
   }
 
   private async addLabelIfDoesNotExist(label: Label): Promise<void> {

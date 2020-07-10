@@ -5952,23 +5952,20 @@ class LabelWorker {
     }
     proccess() {
         return __awaiter(this, void 0, void 0, function* () {
+            yield this.createLabelsInRepo();
             if (this.pr.isMerged()) {
-                this.proccessMergedPR();
+                yield this.removeLabelIfItAlreadyExists(this.configuration.inReviewLabel);
+                yield this.addLabelIfDoesNotExist(this.configuration.doneLabel);
             }
             else {
-                this.proccessActivePR();
+                yield this.addLabelIfDoesNotExist(this.configuration.inReviewLabel);
             }
         });
     }
-    proccessMergedPR() {
+    createLabelsInRepo() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.removeLabelIfItAlreadyExists(this.configuration.inReviewLabel);
-            yield this.addLabelIfDoesNotExist(this.configuration.doneLabel);
-        });
-    }
-    proccessActivePR() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.addLabelIfDoesNotExist(this.configuration.inReviewLabel);
+            yield this.issue.createLabel(this.configuration.inReviewLabel);
+            yield this.issue.createLabel(this.configuration.doneLabel);
         });
     }
     addLabelIfDoesNotExist(label) {
