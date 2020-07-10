@@ -8944,7 +8944,7 @@ exports.handle = void 0;
 const core = __importStar(__webpack_require__(470));
 const pull_request_1 = __webpack_require__(138);
 const issue_1 = __webpack_require__(351);
-function handle(octokit, context) {
+function handle(octokit, context, configuration) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (context.issue.number === undefined) {
@@ -8952,8 +8952,6 @@ function handle(octokit, context) {
         }
         const pr = new pull_request_1.PullRequest(octokit, context);
         const issue = new issue_1.Issue(octokit, context);
-        const inReviewLabel = 'In-Review';
-        const resolvedTestItLabel = 'Resolved (test it)';
         const linkedIssueToPRNumber = yield issue.getLinkedIssueToPrNumber();
         core.info(`Extracting linked issue from PR: ${(_a = linkedIssueToPRNumber === null || linkedIssueToPRNumber === void 0 ? void 0 : linkedIssueToPRNumber.toString()) !== null && _a !== void 0 ? _a : 'not found'}`);
         if (!linkedIssueToPRNumber) {
@@ -8962,19 +8960,19 @@ function handle(octokit, context) {
         }
         core.info('Check if label needs to be added.');
         if (pr.isMerged()) {
-            const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
+            const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name);
             if (containsInReviewLabel) {
-                yield issue.removeLabel(linkedIssueToPRNumber, inReviewLabel);
+                yield issue.removeLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name);
             }
-            const containsResolvedTestItLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, resolvedTestItLabel);
+            const containsResolvedTestItLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, configuration.doneLabel.name);
             if (!containsResolvedTestItLabel) {
-                yield issue.addLabel(linkedIssueToPRNumber, resolvedTestItLabel);
+                yield issue.addLabel(linkedIssueToPRNumber, configuration.doneLabel.name);
             }
         }
         else {
-            const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
+            const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name);
             if (!containsInReviewLabel) {
-                yield issue.addLabel(linkedIssueToPRNumber, inReviewLabel);
+                yield issue.addLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name);
             }
         }
     });
@@ -9025,13 +9023,9 @@ const handler = __importStar(__webpack_require__(856));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const githubToken = core.getInput('github-token');
-            const octokit = github.getOctokit(githubToken);
-            const inReviewLabel = JSON.parse(core.getInput('in-review-label'));
-            core.info('started');
-            core.info(inReviewLabel.name);
-            core.info(inReviewLabel.color);
-            yield handler.handle(octokit, github.context);
+            const configuration = getConfiguration();
+            const octokit = github.getOctokit(configuration.githubToken);
+            yield handler.handle(octokit, github.context, configuration);
         }
         catch (error) {
             core.setFailed(error.message);
@@ -9039,6 +9033,16 @@ function run() {
     });
 }
 exports.run = run;
+function getConfiguration() {
+    const githubToken = core.getInput('github-token');
+    const inReviewLabel = JSON.parse(core.getInput('in-review-label'));
+    const doneLabel = JSON.parse(core.getInput('done-label'));
+    return {
+        githubToken,
+        inReviewLabel,
+        doneLabel
+    };
+}
 
 
 /***/ }),

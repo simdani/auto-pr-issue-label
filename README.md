@@ -1,5 +1,30 @@
 # Auto PR issue label
 
+Exmaple of usage:
+
+```YML
+name: "Auto pr worflow"
+on:
+  pull_request:
+    types: [opened, closed]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto PR issue label
+        uses: simdani/auto-pr-issue-label@master
+```
+
+it's also possible to configure in review and done labels differently:
+
+```YML
+  steps:
+    - uses: simdani/auto-pr-issue-label@master
+      github-token: ${{ github.token }} # default
+      in-review-label: '{"name": "In-Review", "color": "#c2e0c6"}' # default
+      done-label: '{"name": "Resolved (test it), "color": "#0e8a16"}' # default
+```
+
 ## Code in Master
 
 Install the dependencies

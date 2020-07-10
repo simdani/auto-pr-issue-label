@@ -1,4 +1,4 @@
-export interface label {
+export interface Label {
   name: string
   color: string
 }
