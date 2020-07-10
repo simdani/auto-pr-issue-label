@@ -27,6 +27,7 @@ export async function handle(
     return
   }
 
+  core.info('Adding labels to issue')
   if (pr.isMerged()) {
     const containsInReviewLabel = await issue.containsGivenLabel(
       linkedIssueToPRNumber,
@@ -49,7 +50,6 @@ export async function handle(
       linkedIssueToPRNumber,
       inReviewLabel
     )
-    process.stdout.write(containsInReviewLabel.toString())
     if (!containsInReviewLabel) {
       await issue.addLabel(linkedIssueToPRNumber, inReviewLabel)
     }
