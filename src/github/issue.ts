@@ -2,6 +2,7 @@ import {GitHub} from '@actions/github/lib/utils'
 import * as core from '@actions/core'
 import {Context} from '@actions/github/lib/context'
 import {parseIssueNumber} from '../helpers/issueNumberParser'
+import {Label} from '../interfaces/label'
 
 export class Issue {
   private octokit: InstanceType<typeof GitHub>
@@ -34,6 +35,17 @@ export class Issue {
       core.warning(e)
       return null
     }
+  }
+
+  async createLabel(label: Label): Promise<void> {
+    const {owner, repo} = this.context.repo
+
+    await this.octokit.issues.createLabel({
+      owner: owner,
+      repo: repo,
+      name: label.name,
+      color: label.color
+    })
   }
 
   async addLabel(issueNumber: number, label: string): Promise<void> {

@@ -2940,6 +2940,17 @@ class Issue {
             }
         });
     }
+    createLabel(label) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { owner, repo } = this.context.repo;
+            yield this.octokit.issues.createLabel({
+                owner: owner,
+                repo: repo,
+                name: label.name,
+                color: label.color
+            });
+        });
+    }
     addLabel(issueNumber, label) {
         return __awaiter(this, void 0, void 0, function* () {
             const { owner, repo } = this.context.repo;
@@ -7126,6 +7137,72 @@ module.exports = (promise, onFinally) => {
 
 /***/ }),
 
+/***/ 719:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PRWorker = void 0;
+class PRWorker {
+    constructor(pr, issue, linkedIssueToPRNumber, configuration) {
+        this.pr = pr;
+        this.issue = issue;
+        this.linkedIssueToPRNumber = linkedIssueToPRNumber;
+        this.configuration = configuration;
+    }
+    proccess() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.pr.isMerged()) {
+                this.proccessMerged();
+            }
+            else {
+                this.proccessActive();
+            }
+        });
+    }
+    proccessMerged() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.removeLabelIfItAlreadyExists(this.configuration.inReviewLabel);
+            yield this.addLabelIfDoesNotExist(this.configuration.doneLabel);
+        });
+    }
+    proccessActive() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.addLabelIfDoesNotExist(this.configuration.inReviewLabel);
+        });
+    }
+    addLabelIfDoesNotExist(label) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const containsLabel = yield this.issue.containsGivenLabel(this.linkedIssueToPRNumber, label.name);
+            if (!containsLabel) {
+                yield this.issue.addLabel(this.linkedIssueToPRNumber, label.name);
+            }
+        });
+    }
+    removeLabelIfItAlreadyExists(label) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const containsLabel = yield this.issue.containsGivenLabel(this.linkedIssueToPRNumber, label.name);
+            if (containsLabel) {
+                yield this.issue.removeLabel(this.linkedIssueToPRNumber, label.name);
+            }
+        });
+    }
+}
+exports.PRWorker = PRWorker;
+
+
+/***/ }),
+
 /***/ 742:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -8934,10 +9011,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handle = void 0;
-// import * as core from '@actions/core'
 const core = __importStar(__webpack_require__(470));
 const pull_request_1 = __webpack_require__(138);
 const issue_1 = __webpack_require__(351);
+const pr_worker_1 = __webpack_require__(719);
 function handle(octokit, context, configuration) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -8952,23 +9029,8 @@ function handle(octokit, context, configuration) {
             core.info('No issue number was found. Exiting.');
             return;
         }
-        core.info('Check if label needs to be added.');
-        if (pr.isMerged()) {
-            const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name);
-            if (containsInReviewLabel) {
-                yield issue.removeLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name);
-            }
-            const containsResolvedTestItLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, configuration.doneLabel.name);
-            if (!containsResolvedTestItLabel) {
-                yield issue.addLabel(linkedIssueToPRNumber, configuration.doneLabel.name);
-            }
-        }
-        else {
-            const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name);
-            if (!containsInReviewLabel) {
-                yield issue.addLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name);
-            }
-        }
+        const prWorker = new pr_worker_1.PRWorker(pr, issue, linkedIssueToPRNumber, configuration);
+        yield prWorker.proccess();
     });
 }
 exports.handle = handle;

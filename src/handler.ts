@@ -1,10 +1,10 @@
-// import * as core from '@actions/core'
 import * as core from '@actions/core'
 import {Context} from '@actions/github/lib/context'
 import {GitHub} from '@actions/github/lib/utils'
 import {PullRequest} from './github/pull_request'
 import {Issue} from './github/issue'
 import {Configuration} from './interfaces/configuration'
+import {LabelWorker} from './workers/label_worker'
 
 export async function handle(
   octokit: InstanceType<typeof GitHub>,
@@ -26,31 +26,6 @@ export async function handle(
     return
   }
 
-  core.info('Check if label needs to be added.')
-  if (pr.isMerged()) {
-    const containsInReviewLabel = await issue.containsGivenLabel(
-      linkedIssueToPRNumber,
-      configuration.inReviewLabel.name
-    )
-
-    if (containsInReviewLabel) {
-      await issue.removeLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name)
-    }
-
-    const containsResolvedTestItLabel = await issue.containsGivenLabel(
-      linkedIssueToPRNumber,
-      configuration.doneLabel.name
-    )
-    if (!containsResolvedTestItLabel) {
-      await issue.addLabel(linkedIssueToPRNumber, configuration.doneLabel.name)
-    }
-  } else {
-    const containsInReviewLabel = await issue.containsGivenLabel(
-      linkedIssueToPRNumber,
-      configuration.inReviewLabel.name
-    )
-    if (!containsInReviewLabel) {
-      await issue.addLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name)
-    }
-  }
+  const labelWroker = new LabelWorker(pr, issue, linkedIssueToPRNumber, configuration)
+  await labelWroker.proccess()
 }
