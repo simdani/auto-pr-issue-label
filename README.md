@@ -23,7 +23,7 @@ it's also possible to configure in review and done labels differently:
       with:
         github-token: ${{ github.token }} # default
         in-review-label: '{"name": "In-Review", "color": "#c2e0c6"}' # default
-        done-label: '{"name": "Resolved (test it), "color": "#0e8a16"}' # default
+        done-label: '{"name": "Resolved (test it)", "color": "#0e8a16"}' # default
 ```
 
 ## Code in Master

@@ -9,7 +9,7 @@ export async function run(): Promise<void> {
     const configuration = getConfiguration()
     const octokit = github.getOctokit(configuration.githubToken)
 
-    await handler.handle(octokit, github.context)
+    await handler.handle(octokit, github.context, configuration)
   } catch (error) {
     core.setFailed(error.message)
   }

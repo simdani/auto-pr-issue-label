@@ -1985,6 +1985,27 @@ module.exports = require("child_process");
 
 /***/ }),
 
+/***/ 138:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PullRequest = void 0;
+class PullRequest {
+    constructor(octokit, context) {
+        this.octokit = octokit;
+        this.context = context;
+    }
+    isMerged() {
+        return this.context.payload.pull_request && this.context.payload.pull_request['merged'];
+    }
+}
+exports.PullRequest = PullRequest;
+
+
+/***/ }),
+
 /***/ 141:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -2850,6 +2871,110 @@ isStream.duplex = function (stream) {
 isStream.transform = function (stream) {
 	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
 };
+
+
+/***/ }),
+
+/***/ 351:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Issue = void 0;
+const core = __importStar(__webpack_require__(470));
+const issueNumberParser_1 = __webpack_require__(566);
+class Issue {
+    constructor(octokit, context) {
+        this.octokit = octokit;
+        this.context = context;
+    }
+    getLinkedIssueToPrNumber() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { owner, repo } = this.context.repo;
+            try {
+                const issue = yield this.octokit.issues.get({
+                    owner: owner,
+                    repo: repo,
+                    issue_number: this.context.issue.number
+                });
+                const parsedIssueNumberFromBody = Number(issueNumberParser_1.parseIssueNumber(owner, repo, issue.data.body));
+                const extractedIssue = yield this.octokit.issues.get({
+                    owner: owner,
+                    repo: repo,
+                    issue_number: parsedIssueNumberFromBody
+                });
+                return !extractedIssue.data.pull_request ? extractedIssue.data.number : null;
+            }
+            catch (e) {
+                core.warning(e);
+                return null;
+            }
+        });
+    }
+    addLabel(issueNumber, label) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { owner, repo } = this.context.repo;
+            yield this.octokit.issues.addLabels({
+                owner: owner,
+                repo: repo,
+                issue_number: issueNumber,
+                labels: [label]
+            });
+        });
+    }
+    removeLabel(issueNumber, label) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { owner, repo } = this.context.repo;
+            yield this.octokit.issues.removeLabel({
+                owner: owner,
+                repo: repo,
+                issue_number: issueNumber,
+                name: label
+            });
+        });
+    }
+    containsGivenLabel(issueNumber, label) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { owner, repo } = this.context.repo;
+            const issueLabels = yield this.octokit.issues.listLabelsOnIssue({
+                owner: owner,
+                repo: repo,
+                issue_number: issueNumber
+            });
+            return issueLabels.data.some(l => l.name == label);
+        });
+    }
+}
+exports.Issue = Issue;
 
 
 /***/ }),
@@ -6581,6 +6706,51 @@ module.exports = isPlainObject;
 
 /***/ }),
 
+/***/ 566:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseIssueNumber = void 0;
+function parseIssueNumber(owner, repo, description) {
+    const parseFull = parseFullIssue(owner, repo, description);
+    if (parseFull) {
+        return parseFull;
+    }
+    const parseDirect = parseDirectIssue(description);
+    if (parseDirect) {
+        return parseDirect;
+    }
+    return '';
+}
+exports.parseIssueNumber = parseIssueNumber;
+function parseFullIssue(owner, repo, description) {
+    const issueTemplate = `${owner}/${repo}/issues/`;
+    const issueTemplateIndex = description.indexOf(issueTemplate);
+    let result = '';
+    if (issueTemplateIndex !== -1) {
+        const remainingDescription = description.substring(issueTemplateIndex + issueTemplate.length, description.length);
+        for (const value of remainingDescription.split('')) {
+            if (Number(value)) {
+                result += value;
+            }
+            else {
+                break;
+            }
+        }
+    }
+    return result.length > 0 ? result : null;
+}
+function parseDirectIssue(description) {
+    const issueRegex = /#[1-9]\d*\b/g;
+    const issue = description.match(issueRegex);
+    return issue && issue.length > 0 ? issue[0].substr(1) : null;
+}
+
+
+/***/ }),
+
 /***/ 568:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -8737,10 +8907,29 @@ exports.restEndpointMethods = restEndpointMethods;
 /***/ }),
 
 /***/ 856:
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8752,46 +8941,41 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handle = void 0;
-// import {PullRequest} from './github/pull_request'
-// import {Issue} from './github/issue'
-function handle(octokit, context) {
+// import * as core from '@actions/core'
+const core = __importStar(__webpack_require__(470));
+const pull_request_1 = __webpack_require__(138);
+const issue_1 = __webpack_require__(351);
+function handle(octokit, context, configuration) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (context.issue.number === undefined) {
             return;
         }
-        // const pr = new PullRequest(octokit, context)
-        // const issue = new Issue(octokit, context)
-        // const linkedIssueToPRNumber = await issue.getLinkedIssueToPrNumber()
-        // core.info(`Extracting linked issue from PR: ${linkedIssueToPRNumber?.toString() ?? 'not found'}`)
-        // if (!linkedIssueToPRNumber) {
-        //   core.info('No issue number was found. Exiting.')
-        //   return
-        // }
-        // core.info('Check if label needs to be added.')
-        // if (pr.isMerged()) {
-        //   const containsInReviewLabel = await issue.containsGivenLabel(
-        //     linkedIssueToPRNumber,
-        //     configuration.inReviewLabel.name
-        //   )
-        //   if (containsInReviewLabel) {
-        //     await issue.removeLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name)
-        //   }
-        //   const containsResolvedTestItLabel = await issue.containsGivenLabel(
-        //     linkedIssueToPRNumber,
-        //     configuration.doneLabel.name
-        //   )
-        //   if (!containsResolvedTestItLabel) {
-        //     await issue.addLabel(linkedIssueToPRNumber, configuration.doneLabel.name)
-        //   }
-        // } else {
-        //   const containsInReviewLabel = await issue.containsGivenLabel(
-        //     linkedIssueToPRNumber,
-        //     configuration.inReviewLabel.name
-        //   )
-        //   if (!containsInReviewLabel) {
-        //     await issue.addLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name)
-        //   }
-        // }
+        const pr = new pull_request_1.PullRequest(octokit, context);
+        const issue = new issue_1.Issue(octokit, context);
+        const linkedIssueToPRNumber = yield issue.getLinkedIssueToPrNumber();
+        core.info(`Extracting linked issue from PR: ${(_a = linkedIssueToPRNumber === null || linkedIssueToPRNumber === void 0 ? void 0 : linkedIssueToPRNumber.toString()) !== null && _a !== void 0 ? _a : 'not found'}`);
+        if (!linkedIssueToPRNumber) {
+            core.info('No issue number was found. Exiting.');
+            return;
+        }
+        core.info('Check if label needs to be added.');
+        if (pr.isMerged()) {
+            const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name);
+            if (containsInReviewLabel) {
+                yield issue.removeLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name);
+            }
+            const containsResolvedTestItLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, configuration.doneLabel.name);
+            if (!containsResolvedTestItLabel) {
+                yield issue.addLabel(linkedIssueToPRNumber, configuration.doneLabel.name);
+            }
+        }
+        else {
+            const containsInReviewLabel = yield issue.containsGivenLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name);
+            if (!containsInReviewLabel) {
+                yield issue.addLabel(linkedIssueToPRNumber, configuration.inReviewLabel.name);
+            }
+        }
     });
 }
 exports.handle = handle;
@@ -8842,7 +9026,7 @@ function run() {
         try {
             const configuration = getConfiguration();
             const octokit = github.getOctokit(configuration.githubToken);
-            yield handler.handle(octokit, github.context);
+            yield handler.handle(octokit, github.context, configuration);
         }
         catch (error) {
             core.setFailed(error.message);
