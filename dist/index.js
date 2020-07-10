@@ -8895,6 +8895,7 @@ exports.handle = void 0;
 const pull_request_1 = __webpack_require__(138);
 const issue_1 = __webpack_require__(351);
 function handle(octokit, context) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (context.issue.number === undefined) {
             return;
@@ -8904,9 +8905,12 @@ function handle(octokit, context) {
         const inReviewLabel = 'In-Review';
         const resolvedTestItLabel = 'Resolved (test it)';
         const linkedIssueToPRNumber = yield issue.getLinkedIssueToPrNumber();
+        process.stdout.write('extract linked issue');
+        process.stdout.write((_a = linkedIssueToPRNumber === null || linkedIssueToPRNumber === void 0 ? void 0 : linkedIssueToPRNumber.toString()) !== null && _a !== void 0 ? _a : 'not found');
         if (!linkedIssueToPRNumber) {
             return;
         }
+        process.stdout.write('check if pr is merged');
         if (pr.isMerged()) {
             const containsInReviewLabel = issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
             if (containsInReviewLabel) {
@@ -8918,8 +8922,10 @@ function handle(octokit, context) {
             }
         }
         else {
+            process.stdout.write('check if it contains in review label');
             const containsInReviewLabel = issue.containsGivenLabel(linkedIssueToPRNumber, inReviewLabel);
             if (!containsInReviewLabel) {
+                process.stdout.write('add in review label');
                 yield issue.addLabel(linkedIssueToPRNumber, inReviewLabel);
             }
         }
