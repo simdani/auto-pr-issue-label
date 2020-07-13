@@ -16,6 +16,8 @@ export class Issue {
   async getLinkedIssueToPrNumber(): Promise<number | null> {
     const {owner, repo} = this.context.repo
 
+    core.info('Parsing linked issue to pr number.')
+
     try {
       const issue = await this.octokit.issues.get({
         owner,
@@ -29,6 +31,8 @@ export class Issue {
         repo,
         issue_number: parsedIssueNumberFromBody
       })
+
+      core.info(JSON.stringify(extractedIssue))
 
       return !extractedIssue.data.pull_request ? extractedIssue.data.number : null
     } catch (e) {
