@@ -2354,7 +2354,7 @@ function parseFullIssue(owner, repo, description) {
     if (issueTemplateIndex !== -1) {
         const remainingDescription = description.substring(issueTemplateIndex + issueTemplate.length, description.length);
         for (const value of remainingDescription.split('')) {
-            if (Number(value)) {
+            if (Number(value) || value === '0') {
                 result += value;
             }
             else {

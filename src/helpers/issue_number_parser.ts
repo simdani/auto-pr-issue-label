@@ -15,7 +15,7 @@ function parseFullIssue(owner: string, repo: string, description: string): strin
     )
 
     for (const value of remainingDescription.split('')) {
-      if (Number(value)) {
+      if (Number(value) || value === '0') {
         result += value
       } else {
         break
