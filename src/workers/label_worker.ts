@@ -2,8 +2,9 @@ import {PullRequest} from '../github/pull_request'
 import {Issue} from '../github/issue'
 import {Configuration} from '../interfaces/configuration'
 import {Label} from '../interfaces/label'
+import {Worker} from './worker'
 
-export class LabelWorker {
+export class LabelWorker implements Worker {
   private pr: PullRequest
   private issue: Issue
   private linkedIssueToPRNumber: number
@@ -21,33 +22,43 @@ export class LabelWorker {
     this.configuration = configuration
   }
 
-  async proccess(): Promise<void> {
-    await this.createLabelsInRepo()
+  async run(): Promise<void> {
+    const {inReviewLabel, doneLabel} = this.configuration
+
+    await this.createLabelsInRepoIfNeeded()
 
     if (this.pr.isMerged()) {
-      await this.removeLabelIfItAlreadyExists(this.configuration.inReviewLabel)
-      await this.addLabelIfDoesNotExist(this.configuration.doneLabel)
+      await this.removeLabelIfNeeded(inReviewLabel)
+      await this.addLabelIfNeeded(doneLabel)
     } else {
-      await this.addLabelIfDoesNotExist(this.configuration.inReviewLabel)
+      await this.addLabelIfNeeded(inReviewLabel)
     }
   }
 
-  private async createLabelsInRepo(): Promise<void> {
-    await this.issue.createLabel(this.configuration.inReviewLabel)
-    await this.issue.createLabel(this.configuration.doneLabel)
+  private async createLabelsInRepoIfNeeded(): Promise<void> {
+    const {inReviewLabel, doneLabel} = this.configuration
+    const listLabelsInRepo = await this.issue.listLabelsInRepo()
+
+    if (!listLabelsInRepo.find(name => name == inReviewLabel.name)) {
+      await this.issue.createLabel(inReviewLabel)
+    }
+    if (!listLabelsInRepo.find(name => name == doneLabel.name)) {
+      await this.issue.createLabel(doneLabel)
+    }
   }
 
-  private async addLabelIfDoesNotExist(label: Label): Promise<void> {
+  private async addLabelIfNeeded(label: Label): Promise<void> {
     const containsLabel = await this.issue.containsGivenLabel(
       this.linkedIssueToPRNumber,
       label.name
     )
+
     if (!containsLabel) {
       await this.issue.addLabel(this.linkedIssueToPRNumber, label.name)
     }
   }
 
-  private async removeLabelIfItAlreadyExists(label: Label): Promise<void> {
+  private async removeLabelIfNeeded(label: Label): Promise<void> {
     const containsLabel = await this.issue.containsGivenLabel(
       this.linkedIssueToPRNumber,
       label.name

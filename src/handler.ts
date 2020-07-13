@@ -14,7 +14,7 @@ export async function handle(
   if (context.issue.number === undefined) {
     return
   }
-  const pr = new PullRequest(octokit, context)
+  const pr = new PullRequest(context)
   const issue = new Issue(octokit, context)
 
   const linkedIssueToPRNumber = await issue.getLinkedIssueToPrNumber()
@@ -27,5 +27,5 @@ export async function handle(
   }
 
   const labelWroker = new LabelWorker(pr, issue, linkedIssueToPRNumber, configuration)
-  await labelWroker.proccess()
+  await labelWroker.run()
 }

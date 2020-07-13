@@ -1993,8 +1993,7 @@ module.exports = require("child_process");
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PullRequest = void 0;
 class PullRequest {
-    constructor(octokit, context) {
-        this.octokit = octokit;
+    constructor(context) {
         this.context = context;
     }
     isMerged() {
@@ -2960,14 +2959,14 @@ class Issue {
             const { owner, repo } = this.context.repo;
             try {
                 const issue = yield this.octokit.issues.get({
-                    owner: owner,
-                    repo: repo,
+                    owner,
+                    repo,
                     issue_number: this.context.issue.number
                 });
                 const parsedIssueNumberFromBody = Number(issue_number_parser_1.parseIssueNumber(owner, repo, issue.data.body));
                 const extractedIssue = yield this.octokit.issues.get({
-                    owner: owner,
-                    repo: repo,
+                    owner,
+                    repo,
                     issue_number: parsedIssueNumberFromBody
                 });
                 return !extractedIssue.data.pull_request ? extractedIssue.data.number : null;
@@ -2982,8 +2981,8 @@ class Issue {
         return __awaiter(this, void 0, void 0, function* () {
             const { owner, repo } = this.context.repo;
             yield this.octokit.issues.createLabel({
-                owner: owner,
-                repo: repo,
+                owner,
+                repo,
                 name: label.name,
                 color: label.color
             });
@@ -2993,8 +2992,8 @@ class Issue {
         return __awaiter(this, void 0, void 0, function* () {
             const { owner, repo } = this.context.repo;
             yield this.octokit.issues.addLabels({
-                owner: owner,
-                repo: repo,
+                owner,
+                repo,
                 issue_number: issueNumber,
                 labels: [label]
             });
@@ -3004,8 +3003,8 @@ class Issue {
         return __awaiter(this, void 0, void 0, function* () {
             const { owner, repo } = this.context.repo;
             yield this.octokit.issues.removeLabel({
-                owner: owner,
-                repo: repo,
+                owner,
+                repo,
                 issue_number: issueNumber,
                 name: label
             });
@@ -3015,11 +3014,21 @@ class Issue {
         return __awaiter(this, void 0, void 0, function* () {
             const { owner, repo } = this.context.repo;
             const issueLabels = yield this.octokit.issues.listLabelsOnIssue({
-                owner: owner,
-                repo: repo,
+                owner,
+                repo,
                 issue_number: issueNumber
             });
             return issueLabels.data.some(l => l.name == label);
+        });
+    }
+    listLabelsInRepo() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { owner, repo } = this.context.repo;
+            const repoLabels = yield this.octokit.issues.listLabelsForRepo({
+                owner,
+                repo
+            });
+            return repoLabels.data.map(label => label.name);
         });
     }
 }
@@ -5950,25 +5959,32 @@ class LabelWorker {
         this.linkedIssueToPRNumber = linkedIssueToPRNumber;
         this.configuration = configuration;
     }
-    proccess() {
+    run() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.createLabelsInRepo();
+            const { inReviewLabel, doneLabel } = this.configuration;
+            yield this.createLabelsInRepoIfNeeded();
             if (this.pr.isMerged()) {
-                yield this.removeLabelIfItAlreadyExists(this.configuration.inReviewLabel);
-                yield this.addLabelIfDoesNotExist(this.configuration.doneLabel);
+                yield this.removeLabelIfNeeded(inReviewLabel);
+                yield this.addLabelIfNeeded(doneLabel);
             }
             else {
-                yield this.addLabelIfDoesNotExist(this.configuration.inReviewLabel);
+                yield this.addLabelIfNeeded(inReviewLabel);
             }
         });
     }
-    createLabelsInRepo() {
+    createLabelsInRepoIfNeeded() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.issue.createLabel(this.configuration.inReviewLabel);
-            yield this.issue.createLabel(this.configuration.doneLabel);
+            const { inReviewLabel, doneLabel } = this.configuration;
+            const listLabelsInRepo = yield this.issue.listLabelsInRepo();
+            if (!listLabelsInRepo.find(name => name == inReviewLabel.name)) {
+                yield this.issue.createLabel(inReviewLabel);
+            }
+            if (!listLabelsInRepo.find(name => name == doneLabel.name)) {
+                yield this.issue.createLabel(doneLabel);
+            }
         });
     }
-    addLabelIfDoesNotExist(label) {
+    addLabelIfNeeded(label) {
         return __awaiter(this, void 0, void 0, function* () {
             const containsLabel = yield this.issue.containsGivenLabel(this.linkedIssueToPRNumber, label.name);
             if (!containsLabel) {
@@ -5976,7 +5992,7 @@ class LabelWorker {
             }
         });
     }
-    removeLabelIfItAlreadyExists(label) {
+    removeLabelIfNeeded(label) {
         return __awaiter(this, void 0, void 0, function* () {
             const containsLabel = yield this.issue.containsGivenLabel(this.linkedIssueToPRNumber, label.name);
             if (containsLabel) {
@@ -9018,7 +9034,7 @@ function handle(octokit, context, configuration) {
         if (context.issue.number === undefined) {
             return;
         }
-        const pr = new pull_request_1.PullRequest(octokit, context);
+        const pr = new pull_request_1.PullRequest(context);
         const issue = new issue_1.Issue(octokit, context);
         const linkedIssueToPRNumber = yield issue.getLinkedIssueToPrNumber();
         core.info(`Extracting linked issue from PR: ${(_a = linkedIssueToPRNumber === null || linkedIssueToPRNumber === void 0 ? void 0 : linkedIssueToPRNumber.toString()) !== null && _a !== void 0 ? _a : 'not found'}`);
@@ -9027,7 +9043,7 @@ function handle(octokit, context, configuration) {
             return;
         }
         const labelWroker = new label_worker_1.LabelWorker(pr, issue, linkedIssueToPRNumber, configuration);
-        yield labelWroker.proccess();
+        yield labelWroker.run();
     });
 }
 exports.handle = handle;

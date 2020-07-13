@@ -18,15 +18,15 @@ export class Issue {
 
     try {
       const issue = await this.octokit.issues.get({
-        owner: owner,
-        repo: repo,
+        owner,
+        repo,
         issue_number: this.context.issue.number
       })
 
       const parsedIssueNumberFromBody = Number(parseIssueNumber(owner, repo, issue.data.body))
       const extractedIssue = await this.octokit.issues.get({
-        owner: owner,
-        repo: repo,
+        owner,
+        repo,
         issue_number: parsedIssueNumberFromBody
       })
 
@@ -41,8 +41,8 @@ export class Issue {
     const {owner, repo} = this.context.repo
 
     await this.octokit.issues.createLabel({
-      owner: owner,
-      repo: repo,
+      owner,
+      repo,
       name: label.name,
       color: label.color
     })
@@ -52,8 +52,8 @@ export class Issue {
     const {owner, repo} = this.context.repo
 
     await this.octokit.issues.addLabels({
-      owner: owner,
-      repo: repo,
+      owner,
+      repo,
       issue_number: issueNumber,
       labels: [label]
     })
@@ -63,8 +63,8 @@ export class Issue {
     const {owner, repo} = this.context.repo
 
     await this.octokit.issues.removeLabel({
-      owner: owner,
-      repo: repo,
+      owner,
+      repo,
       issue_number: issueNumber,
       name: label
     })
@@ -74,11 +74,22 @@ export class Issue {
     const {owner, repo} = this.context.repo
 
     const issueLabels = await this.octokit.issues.listLabelsOnIssue({
-      owner: owner,
-      repo: repo,
+      owner,
+      repo,
       issue_number: issueNumber
     })
 
     return issueLabels.data.some(l => l.name == label)
+  }
+
+  async listLabelsInRepo(): Promise<string[]> {
+    const {owner, repo} = this.context.repo
+
+    const repoLabels = await this.octokit.issues.listLabelsForRepo({
+      owner,
+      repo
+    })
+
+    return repoLabels.data.map(label => label.name)
   }
 }
