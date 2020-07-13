@@ -8,11 +8,11 @@ inputs:
     required: false
   in-review-label:
     description: 'In review label title and color'
-    default: '{"name": "In-Review", "color": "#c2e0c6"}'
+    default: '{"name": "In-Review", "color": "c2e0c6"}'
     required: false
   done-label:
     descrition: 'Done label title and color'
-    default: '{"name": "Resolved (test it)", "color": "#0e8a16"}'
+    default: '{"name": "Resolved (test it)", "color": "0e8a16"}'
     required: false
 runs:
   using: 'node12'
